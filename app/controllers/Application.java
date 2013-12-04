@@ -20,7 +20,7 @@ public class Application extends Controller {
     public static Result index() {
     	
     	RssParser rss = new RssParser();
-    	List<String> grevistes = new ArrayList<>();
+    	List<String> grevistes = new ArrayList<String>();
 
 		try{
 		        //RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
