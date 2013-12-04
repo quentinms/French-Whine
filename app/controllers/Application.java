@@ -23,9 +23,9 @@ public class Application extends Controller {
     	List<String> grevistes = new ArrayList<String>();
 
 		try{
-		        //RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
+		        RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
 			
-				RssFeed feed = rss.load("/Users/quentin/Documents/workspace/Workspace-Perso/FrenchWhine-test/src/test.rss");
+				//RssFeed feed = rss.load("/Users/quentin/Documents/workspace/Workspace-Perso/FrenchWhine-test/src/test.rss");
 		        
 		        // Gets the channel information of the feed and 
 		        // display its title
