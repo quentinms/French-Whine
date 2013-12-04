@@ -63,7 +63,7 @@ public class Application extends Controller {
     
     public static String extractGreviste(String linkTitle){
 		
-		Pattern pattern = Pattern.compile("((\\w|\\s)+) en grève",Pattern.UNICODE_CHARACTER_CLASS);
+		Pattern pattern = Pattern.compile("((\\w|\\s)+) en grève", Pattern.UNICODE_CHARACTER_CLASS);
 	    Matcher matcher = pattern.matcher(linkTitle);
 	    
 	    String greviste = "";
