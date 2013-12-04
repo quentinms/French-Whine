@@ -1,4 +1,4 @@
-@(grevistes: List[String])
+@(grevistes: List[GreveItem])
 
 <!DOCTYPE html>
 
@@ -19,8 +19,8 @@
     	<article>
     	<div id="grevistes">
 	        <div id="aujourdhui">Aujourd'hui,</div>
-	        	<a href="#">@grevistes.head</a>@for(greviste <- grevistes.dropRight(1).drop(1)) {, <a href="#">@greviste</a>}
-				 et <a href="#">@grevistes.last</a>
+	        	<a target="_blank" href="@grevistes.head.newsUrl">@grevistes.head.greviste</a>@for(greviste <- grevistes.dropRight(1).drop(1)) {, <a target="_blank" href="@greviste.newsUrl">@greviste.greviste</a>}
+				 et <a target="_blank" href="@grevistes.last.newsUrl">@grevistes.last.greviste</a>
 				
 		</div>
 		<div id="engreve">sont en grève.</div>
@@ -31,7 +31,7 @@
 	    		<div class="blanc"></div>
 	    		<div class="rouge"></div>
     		</div>
-    		<div id="MadeInSwitzerland">Fait par @@quentinms, avec Play, et blablabla</div>
+    		<div id="MadeInSwitzerland">Fait par <a href="http://twitter.com/quentinms" target="_blank">@@quentinms</a>, avec <a href="http://playframework.com" target="_blank">Play</a>, et blablabla</div>
     	</footer>
     </body>
 </html>

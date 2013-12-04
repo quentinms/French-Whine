@@ -20,7 +20,7 @@ public class Application extends Controller {
     public static Result index() {
     	
     	RssParser rss = new RssParser();
-    	List<String> grevistes = new ArrayList<String>();
+    	List<GreveItem> grevistes = new ArrayList<GreveItem>();
 
 		try{
 		        RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
@@ -45,7 +45,7 @@ public class Application extends Controller {
 		             //System.out.println("Gréviste: "+ extractGreviste(item.getTitle()));
 		             String grev = extractGreviste(item.getTitle());
 		             if (!grev.isEmpty()){
-		            	 grevistes.add(grev);
+		            	 grevistes.add(new GreveItem(grev, item.getLink()));
 		             }
 		             //System.out.println("Link : " + item.getLink());
 		             //System.out.println("Desc.: " + item.getDescription()); 
@@ -63,15 +63,29 @@ public class Application extends Controller {
     
     public static String extractGreviste(String linkTitle){
 		
-		Pattern pattern = Pattern.compile("((\\w|\\s)+) en grève", Pattern.UNICODE_CHARACTER_CLASS);
+		Pattern pattern = Pattern.compile("(.+) en grève", Pattern.UNICODE_CHARACTER_CLASS);
 	    Matcher matcher = pattern.matcher(linkTitle);
 	    
 	    String greviste = "";
 	    
 	    if(matcher.find()){
 	    	greviste = matcher.group(1);
-	    	greviste = greviste.toLowerCase();
+	    	//greviste = greviste.toLowerCase();
 	 	    greviste = greviste.trim();
+	    }
+	    
+	    /*Grève de la XXX*/
+	    if(greviste.isEmpty()){
+		    pattern = Pattern.compile("(g|G)rève (de|à) (la \\w+)",Pattern.UNICODE_CHARACTER_CLASS);
+		    matcher = pattern.matcher(linkTitle);
+		    
+		    greviste = "";
+		    
+		    if(matcher.find()){
+		    	greviste = matcher.group(3);
+		    	//greviste = greviste.toLowerCase();
+		 	    greviste = greviste.trim();
+		    }
 	    }
 	    
 		return greviste;

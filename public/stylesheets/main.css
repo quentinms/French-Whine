@@ -1,12 +1,12 @@
 body{
 	background: url('../../assets/images/coq1.png') no-repeat fixed right bottom ;
+	font-family: 'Montserrat', sans-serif;
 }
 
 article{
 	background: none;
 	margin: auto;
 	margin-top: 50px;
-	font-family: 'Montserrat', sans-serif;
 	text-align: center;
 }
 
