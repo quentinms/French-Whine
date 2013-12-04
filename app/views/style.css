@@ -1,0 +1,89 @@
+body{
+	background: url('coq1.png') no-repeat fixed right bottom ;
+}
+
+article{
+	background: none;
+	margin: auto;
+	margin-top: 50px;
+	font-family: 'Montserrat', sans-serif;
+	text-align: center;
+}
+
+#aujourdhui{
+	font-size: 120px;
+}
+
+#grevistes{
+	font-size: 100px;
+}
+
+#grevistes a{
+	text-decoration: none;
+}
+
+#grevistes a:nth-child(even){
+	color: red;
+}
+
+#grevistes a:nth-child(odd){
+	color: blue;
+}
+
+#engreve{
+	font-size: 120px;
+}
+
+footer{
+	position: fixed;
+	bottom: 0px;
+	text-align: center;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#drapeauEnHaut{
+	top: 0px;
+}
+
+#drapeauEnBas{
+	bottom: 0px;
+	display: none;
+}
+
+.drapeau{
+	position: fixed;
+	left: 0px;
+	text-align: center;
+	width: 100%;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+}
+
+.bleu{
+	background: blue;
+	float: left;
+	width: 33%;
+	height: 100%;
+	display: block;
+}
+
+.blanc{
+	background: transparent;
+	float: left;
+	width: 34%;
+	height: 100%;
+	display: block;
+}
+
+.rouge{
+	background: red;
+	float: left;
+	width: 33%;
+	height: 100%;
+	display: block;
+}
+
+
