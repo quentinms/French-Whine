@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +21,7 @@ public class Application extends Controller {
     public static Result index() {
     	
     	RssParser rss = new RssParser();
-    	List<GreveItem> grevistes = new ArrayList<GreveItem>();
+    	ArrayList<GreveItem> grevistes = new ArrayList<GreveItem>();
 
 		try{
 		        RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
@@ -44,7 +45,7 @@ public class Application extends Controller {
 		             //System.out.println("Title: " + item.getTitle());
 		             //System.out.println("Gréviste: "+ extractGreviste(item.getTitle()));
 		             String grev = extractGreviste(item.getTitle());
-		             if (!grev.isEmpty()){
+		             if (!grev.isEmpty() && !grevistes.contains(new GreveItem(grev, null))){
 		            	 grevistes.add(new GreveItem(grev, item.getLink()));
 		             }
 		             //System.out.println("Link : " + item.getLink());
@@ -61,34 +62,30 @@ public class Application extends Controller {
         return ok(index.render(grevistes));
     }
     
-    public static String extractGreviste(String linkTitle){
+public static String extractGreviste(String linkTitle){
 		
-		Pattern pattern = Pattern.compile("(.+) en grève", Pattern.UNICODE_CHARACTER_CLASS);
-	    Matcher matcher = pattern.matcher(linkTitle);
-	    
-	    String greviste = "";
-	    
-	    if(matcher.find()){
-	    	greviste = matcher.group(1);
-	    	//greviste = greviste.toLowerCase();
-	 	    greviste = greviste.trim();
-	    }
-	    
-	    /*Grève de la XXX*/
-	    if(greviste.isEmpty()){
-		    pattern = Pattern.compile("(g|G)rève (de|à) (la \\w+)",Pattern.UNICODE_CHARACTER_CLASS);
-		    matcher = pattern.matcher(linkTitle);
-		    
-		    greviste = "";
-		    
+		ArrayList<Pattern>  grevisteFindingPatterns= new ArrayList<>();
+		
+		grevisteFindingPatterns.add(Pattern.compile("(?<greviste>(\\w|\\s)+)(sont)? en grève",Pattern.UNICODE_CHARACTER_CLASS));
+		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (de|à) (?<greviste>la \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
+		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (?<greviste>des \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
+		
+		String greviste = "";
+		
+		for(Pattern pattern: grevisteFindingPatterns){
+		    Matcher matcher = pattern.matcher(linkTitle);
 		    if(matcher.find()){
-		    	greviste = matcher.group(3);
+		    	greviste = matcher.group("greviste");
 		    	//greviste = greviste.toLowerCase();
 		 	    greviste = greviste.trim();
+		 	    break;
 		    }
-	    }
+		}
+		
+		greviste = greviste.replaceAll("^(d|D)es ", "les ");
+		greviste = greviste.replaceAll("^Les ", "les ");
+	    
 	    
 		return greviste;
 	}
-
 }
