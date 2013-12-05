@@ -66,7 +66,7 @@ public static String extractGreviste(String linkTitle){
 		
 		ArrayList<Pattern>  grevisteFindingPatterns= new ArrayList<>();
 		
-		grevisteFindingPatterns.add(Pattern.compile("(?<greviste>(\\w|\\s)+)(sont)? en grève",Pattern.UNICODE_CHARACTER_CLASS));
+		grevisteFindingPatterns.add(Pattern.compile("(?<greviste>(%|'|\\w|\\s)+)(sont)? en grève",Pattern.UNICODE_CHARACTER_CLASS));
 		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (de|à) (?<greviste>la \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
 		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (?<greviste>des \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
 		
