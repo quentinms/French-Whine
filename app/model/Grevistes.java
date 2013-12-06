@@ -1,43 +1,75 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.horrabin.horrorss.RssChannelBean;
 import org.horrabin.horrorss.RssFeed;
-import org.horrabin.horrorss.RssImageBean;
 import org.horrabin.horrorss.RssItemBean;
 import org.horrabin.horrorss.RssParser;
+
+import com.memetix.mst.language.Language;
+import com.memetix.mst.translate.Translate;
 
 import controllers.GreveItem;
 
 public class Grevistes implements Runnable{
 	
-	public static ArrayList<GreveItem> grevistes = new ArrayList<GreveItem>();
+	static HashSet<String> falsePositives;
+	static {
+		falsePositives =  new HashSet<String>();	
+		falsePositives.add("toujours en grève");
+		falsePositives.add("grève de la faim");
+	}
+	
+	public static ArrayList<GreveItem> grevistes = new ArrayList<GreveItem>();;
 	public static ArrayList<GreveItem> strikers = new ArrayList<GreveItem>();
 
 	@Override
 	public void run() {
 		RssParser rss = new RssParser();
+		
+		ArrayList<GreveItem> newGrevistes = new ArrayList<GreveItem>();
 
 		try{
 		        RssFeed feed = rss.load("http://news.google.com/news?q=greve&hl=fr&output=rss&num=20&ned=fr");
-		        RssChannelBean channel = feed.getChannel();
-		        
+		       
 		        // Gets and iterate the items of the feed 
 		        List<RssItemBean> items = feed.getItems();
 		        for (int i=0; i<items.size(); i++){
 		             RssItemBean item = items.get(i); 
 		             
-		             String grev = extractGreviste(item.getTitle());
-		             if (!grev.isEmpty() && !grevistes.contains(new GreveItem(grev, null))){
-		            	 grevistes.add(new GreveItem(grev, item.getLink()));
-		             }
+		             Calendar pubDate  = Calendar.getInstance();
+		             pubDate.setTime(item.getPubDate());
+		            
+		             Calendar today = Calendar.getInstance(); 
+		             if(today.get(Calendar.DAY_OF_YEAR) == pubDate.get(Calendar.DAY_OF_YEAR) ){
+		            	 
+			             String grev = extractGreviste(item.getTitle());
+			             if (!grev.isEmpty() && !newGrevistes.contains(new GreveItem(grev, null))){
+			            	 
+			            	 String url = item.getLink();
+			            	 
+			            	 Pattern p = Pattern.compile("&url=(.+)&?");
+				             Matcher matcher = p.matcher(url);
+				             
+				             if(matcher.find()){
+				            	 url = matcher.group(1);
+				             } 
+			            	 newGrevistes.add(new GreveItem(grev, url));
+			             }
+			             
+		        }
 		        }
 		        
+		        grevistes = newGrevistes;
+		        strikers = translateToEnglish(newGrevistes);
 		        System.out.println(grevistes);
+		        System.out.println(strikers);
 		        
 		}catch(Exception e){
 				System.out.println(e);
@@ -45,7 +77,7 @@ public class Grevistes implements Runnable{
 		
 	}
 	
-public static String extractGreviste(String linkTitle){
+	public String extractGreviste(String linkTitle){
 		
 		ArrayList<Pattern>  grevisteFindingPatterns= new ArrayList<>();
 		
@@ -57,18 +89,38 @@ public static String extractGreviste(String linkTitle){
 		
 		for(Pattern pattern: grevisteFindingPatterns){
 		    Matcher matcher = pattern.matcher(linkTitle);
-		    if(matcher.find()){
+		    if(matcher.find() && !falsePositives.contains(matcher.group().toLowerCase())){
 		    	greviste = matcher.group("greviste");
-		    	//greviste = greviste.toLowerCase();
 		 	    greviste = greviste.trim();
 		 	    break;
 		    }
 		}
 		
-		greviste = greviste.replaceAll("^(d|D)es ", "les ");
-		greviste = greviste.replaceAll("^Les ", "les ");
+		if(!greviste.isEmpty()){
+			greviste = greviste.replaceFirst("^(d|D)es ", "les ");
+			greviste = greviste.replaceFirst(greviste.charAt(0)+"", (greviste.charAt(0)+"").toLowerCase());
+		}
 	    
 	    
 		return greviste;
+	}
+
+	public ArrayList<GreveItem> translateToEnglish(ArrayList<GreveItem> grevistesToTranslate){
+		String[] words = null;
+		Translate.setClientId("FrenchWhine");
+	    Translate.setClientSecret("5i/ZSL+yrX+lRKVikdgjFB+t0WRU3ztk5UzIbCtk1Nc=");
+	    
+	    ArrayList<GreveItem> list = new ArrayList<>() ;
+	    
+	    try {
+	    	for(GreveItem greviste: grevistesToTranslate){
+	    		list.add(new GreveItem(Translate.execute(greviste.greviste, Language.FRENCH, Language.ENGLISH), "http://translate.google.com/translate?sl=fr&tl=en&u="+greviste.newsUrl));
+	    	}
+	    } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    return list;
 	}
 }
