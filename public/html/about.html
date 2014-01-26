@@ -1,0 +1,51 @@
+<!DOCTYPE html>  
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>frenchwhine</title>
+  <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
+  <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" media="screen" href="/assets/stylesheets/about.css">
+</head>
+<body>
+<div class="drapeau" id="drapeauEnHaut">
+    		<div class="bleu"></div>
+    		<div class="blanc"><h1>French Whine</h1></div>
+    		<div class="rouge"></div>
+</div>
+ 
+
+
+<h2>How it works</h2>
+
+<h3>Getting the news</h3>
+
+<p>We search Google News for the word <a href="http://news.google.com/news?q=greve&hl=fr&num=20&ned=fr">"grève"</a> in the french edition which gives us a list of articles (title + newspaper link) that we can fetch as an RSS.</p>
+
+<h3> Extracting the info</h3>
+
+<p>From the list of titles, we try to determine who is on strike. The way we do this is by parsing the title, and then, thanks to a Part-of-Speech tagger, we are able to determine what is the subject, what is the verb, etc. in the sentence. It is then relatively easy to extract the name of the striker with a Regex.<br/>
+There are however still a few issues: first of all, articles' titles are usually not grammatically correct sentences which sometimes confuses the POS Tagger, and secondly, POS taggers are pretty good in English, but not so much in French.</p>
+
+<p>Finally, the list of strikers is translated by Bing for the English version of the website.</p>
+
+<h3>Libraries used</h3>
+
+<ul>
+<li><a href="http://www.playframework.com">Play</a></li>
+<li><a href="http://horrorss.googlecode.com">HorroRSS</a> to retrieve the RSS feed</li>
+<li><a href="http://nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a> for the parser and POS tagger.</li>
+<li><a href="https://code.google.com/p/microsoft-translator-java-api/">Microsoft Translator API</a> for the Bing translation</li>
+</ul>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Better regex to extract useful information</li>
+<li>Find a more suited POS tagger.</li>
+</ul>
+
+<hr>
+Rooster illustration by <a href="http://commons.wikimedia.org/wiki/User:Wagner51">Jérôme Blum</a>
+</body>
+</html>
