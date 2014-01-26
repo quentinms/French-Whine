@@ -33,12 +33,12 @@
 			  personne
 			} else {
 	        	<a target="_blank" href="@grevistes.head.newsUrl">@grevistes.head.greviste</a>@for(greviste <- grevistes.dropRight(1).drop(1)) {, <a target="_blank" href="@greviste.newsUrl">@greviste.greviste</a>}
-				 et <a target="_blank" href="@grevistes.last.newsUrl">@grevistes.last.greviste</a>
+				 @if(grevistes.size > 1){et <a target="_blank" href="@grevistes.last.newsUrl">@grevistes.last.greviste</a>}
 			}
 				
 		</div>
 		<div id="engreve"> @if(grevistes.size >= 2){sont} else {@if(grevistes.isEmpty()) {n'}est} en grève.</div>
-		<div id="info">@if(grevistes.isEmpty()){Ce n'était pas arrivé depuis le 1er Janvier 1970}</div>
+		<!-- <div id="info">@if(grevistes.isEmpty()){Ce n'était pas arrivé depuis le 1er Janvier 1970}</div> -->
     	</article>
     	<footer>
     		<div class="drapeau" id="drapeauEnBas">

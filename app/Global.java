@@ -15,7 +15,7 @@ public class Global extends GlobalSettings {
 		
 		Akka.system().scheduler().schedule(
                 Duration.create(0, TimeUnit.MILLISECONDS),
-                Duration.create(10, TimeUnit.MINUTES),
+                Duration.create(60, TimeUnit.MINUTES),
                 new Grevistes() , Akka.system().dispatcher()
         );
 	

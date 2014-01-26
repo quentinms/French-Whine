@@ -1,5 +1,7 @@
 package model;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -7,7 +9,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.horrabin.horrorss.RssChannelBean;
 import org.horrabin.horrorss.RssFeed;
 import org.horrabin.horrorss.RssItemBean;
 import org.horrabin.horrorss.RssParser;
@@ -16,6 +17,15 @@ import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 
 import controllers.GreveItem;
+import edu.stanford.nlp.international.french.process.FrenchTokenizer;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 
 public class Grevistes implements Runnable{
 	
@@ -28,6 +38,8 @@ public class Grevistes implements Runnable{
 	
 	public static ArrayList<GreveItem> grevistes = new ArrayList<GreveItem>();;
 	public static ArrayList<GreveItem> strikers = new ArrayList<GreveItem>();
+	static LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
+
 
 	@Override
 	public void run() {
@@ -79,32 +91,61 @@ public class Grevistes implements Runnable{
 	
 	public String extractGreviste(String linkTitle){
 		
-		ArrayList<Pattern>  grevisteFindingPatterns= new ArrayList<>();
-		
-		grevisteFindingPatterns.add(Pattern.compile("(?<greviste>(-|%|'|\\w|\\s)+)(sont)? en grève",Pattern.UNICODE_CHARACTER_CLASS));
-		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (de|à) (?<greviste>la \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
-		grevisteFindingPatterns.add(Pattern.compile("(g|G)rève( générale| nationale)? (?<greviste>des \\w+)",Pattern.UNICODE_CHARACTER_CLASS));
-		
 		String greviste = "";
 		
-		for(Pattern pattern: grevisteFindingPatterns){
-		    Matcher matcher = pattern.matcher(linkTitle);
-		    if(matcher.find() && !falsePositives.contains(matcher.group().toLowerCase())){
-		    	greviste = matcher.group("greviste");
-		 	    greviste = greviste.trim();
-		 	    break;
+		//Tokenize the title
+		TokenizerFactory<CoreLabel> tokenizerFactory=FrenchTokenizer.ftbFactory();
+	    Reader reader = new StringReader(linkTitle);
+        Tokenizer<CoreLabel> tokenizer=tokenizerFactory.getTokenizer(reader);
+        
+        List<String> tokens =new ArrayList<String>();
+        while(tokenizer.hasNext()){
+        	tokens.add(tokenizer.next().word());
+        }
+        
+        //Part of Speech Tagging
+        List<CoreLabel> rawWords = Sentence.toCoreLabelList(tokens.toArray(new String[0]));
+	    Tree parse = lp.apply(rawWords);
+	    parse = lp.apply(rawWords);
+	    parse.pennPrint();
+	    System.out.println();
+	   
+	    
+	    ArrayList<TregexPattern>  grevisteFindingPatterns= new ArrayList<>();
+	    
+	    //En grève
+	     grevisteFindingPatterns.add(TregexPattern.compile("NP=greviste $+ (VN << grève)"));
+	     grevisteFindingPatterns.add(TregexPattern.compile("NP=greviste $+ (PP << grève)"));
+	   //Grève verb XXXX
+	     grevisteFindingPatterns.add(TregexPattern.compile("NP << grève $+ (VN $+ NP=greviste)"));
+	     grevisteFindingPatterns.add(TregexPattern.compile("NP << grève $+ (VN $+ (PP < NP=greviste))"));
+	   //Grève dans XXXX
+	     grevisteFindingPatterns.add(TregexPattern.compile("N << Grève $ (PP < NP=greviste)"));
+	   
+	    
+	    for(TregexPattern tp: grevisteFindingPatterns){
+		    TregexMatcher m = tp.matcher(parse);
+		    if (m.find()) {
+		      Tree t = m.getNode("greviste");
+		      for (Tree leaf : t.getLeaves()){
+		    	  greviste += leaf+" ";
+		    	  
+		      }
 		    }
-		}
+	    }
 		
-		if(!greviste.isEmpty()){
+	    greviste = greviste.trim();
+ 	    System.out.println(greviste);
+ 	    
+ 	   if(!greviste.isEmpty()){
 			greviste = greviste.replaceFirst("^(d|D)es ", "les ");
 			greviste = greviste.replaceFirst(greviste.charAt(0)+"", (greviste.charAt(0)+"").toLowerCase());
 		}
-	    
-	    
+ 	    
 		return greviste;
 	}
 
+	//TODO handle [] case
 	public ArrayList<GreveItem> translateToEnglish(ArrayList<GreveItem> grevistesToTranslate){
 		String[] words = null;
 		Translate.setClientId("FrenchWhine");
